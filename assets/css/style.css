@@ -1,0 +1,39 @@
+.container {
+    background-color: #171E54;
+    margin: 60px auto;
+    max-width: 960px;
+    padding: 30px;
+    opacity: 0.90;
+    color: #D3D3D3;
+}
+
+h3 {
+    color: #86e6e1;
+}
+
+/* Update this for specific elements in the container for line spacing */
+.container * {
+    line-height: 1.6;
+}
+
+.radio-space {
+    margin-right: 5px;
+    margin-left: 15px;
+}
+
+body {
+    background-image: url("../images/candles.jpg");
+    background-size: auto;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding-bottom: 5%;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+}
+
+div {
+    padding-bottom: 10px;
+}
