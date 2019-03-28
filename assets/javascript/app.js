@@ -21,14 +21,118 @@ for (i = 0; i < questions.length; i++) {
     indexes.push(i);
 };
 
-$(document).ready(function () {
-
-    // this is where the timer starts at
+// this is where the timer starts at
     var startTime = 31;
     var intervalId;
 
+// this function writes question rows to my HTML - LEAVE AS IS
+    function makeQuestionRow() {
+        // this variable picks a random index from indexes array
+        var chosenIndex = Math.floor(Math.random() * Math.floor(indexes.length));
+        // this variable gives you the randomly chosen index inside either questions or answers arrays
+        var qaIndex = indexes[chosenIndex];
+        // these variables write each random question/answer to my HTML
+        var questionRow = $("<h3>").html(questions[qaIndex]);
+        var answerRow = $('<div>');
+        // this loops through each index of the answer array chosen (given by chosenIndex) that matches the questions array 
+        for (var i = 0; i < 4; i++) {
+            var answerText = answers[qaIndex][i];
+            answerRow.append($('<label><input class="radio-space" type="radio" name="optradio' + qaIndex + '"value=' + i + '>' + answerText + '</label>'));
+        };
+        // this removes the random (chosenIndex) from indexes array, so we don't get any repeats
+        indexes.splice(chosenIndex, 1);
+        // this writes the question/answer lines in the html class container
+        $(".qa-container").append(questionRow, answerRow);
+        // this pushes the randomly chosen index into a new array
+        qaCheck.push(qaIndex);
+    };
+
+    // defining a function that resets the game when solemnly swear button is clicked
+    function resetGame() {
+        winCount = 0;
+        noAnswer = 0;
+    
+        $('.status-container').hide();
+        $('.status-container').empty();
+        $('.qa-container').empty();
+        $('.qa-container').show();
+        qaCheck = [];
 
 
+        $('#timer').show();
+        startTime = 31;
+        run();
+        decrement();
+        indexes = [];
+        for (i = 0; i < questions.length; i++) {
+            indexes.push(i);
+        }
+        for (var i = 0; i < 8; i++) {
+            makeQuestionRow();
+        }
+
+        var doneEarly = $('<button type="button" class="btn btn-warning">Mischief Managed</button>');
+        //$(".qa-container").append(doneEarly);
+
+        $(".qa-container").append(doneEarly);
+        doneEarly.on("click", function () {
+            $('#timer').hide();
+            $('.qa-container').hide();
+            addToStatusCont();
+            stop();
+        });
+    }
+
+    function run() {
+        // this is set to run every second - does not run decrement here (no parenthases)
+        clearInterval(intervalId);
+        // this makes something happen every second
+        intervalId = setInterval(decrement, 1000);
+    };
+
+    function decrement() {
+        // this reduces the startTime by one, every second ^
+        startTime--;
+        // adds the current number to the DOM (visible)
+        $("#timer").html("<h4> Time Remaining: " + startTime + "</h4>");
+        if (startTime === 0) {
+            stop();
+            addToStatusCont();
+        };
+    };
+
+    // defining function called stop
+    function stop() {
+        clearInterval(intervalId);
+    }
+
+     // this function gives me the index value of the answer array that the user checked
+     function getCheckValue() {
+        for (var i = 0; i < qaCheck.length; i++) {
+            var checkedAns = $('[name=optradio' + qaCheck[i] + ']:checked').val();
+            if (parseInt(checkedAns) === correctAnswers[qaCheck[i]]) {
+                winCount++;
+            } else if (checkedAns === undefined) {
+                noAnswer++;
+            }
+        };
+    };
+
+    function addToStatusCont() {
+        getCheckValue();
+        $('.qa-container').hide();
+        $('.status-container').append('<div>Correct Answers: ' + winCount + '</div>').show();
+        $('.status-container').append('<div>Incorrect Answers: ' + (8 - winCount - noAnswer) + '</div>');
+        $('.status-container').append('<div>Unanswered: ' + noAnswer + '</div><br>');
+        var resetButton = $('<button type="button" class="btn btn-info">I solemnly swear that I am up to no good.</button>');
+        $('.status-container').append(resetButton);
+
+        resetButton.on("click", function () {
+            resetGame();
+        });
+    };
+
+$(document).ready(function () {
 
     // when the Begin button is clicked:
     $(".btn").on("click", function () {
@@ -63,121 +167,6 @@ $(document).ready(function () {
         // this hides the start quiz button after click
         $(".btn-dark").hide();
     });
-
-    // this function writes question rows to my HTML - LEAVE AS IS
-    function makeQuestionRow() {
-        // this variable picks a random index from indexes array
-        var chosenIndex = Math.floor(Math.random() * Math.floor(indexes.length));
-        // this variable gives you the randomly chosen index inside either questions or answers arrays
-        var qaIndex = indexes[chosenIndex];
-        // these variables write each random question/answer to my HTML
-        var questionRow = $("<h3>").html(questions[qaIndex]);
-        var answerRow = $('<div>');
-        // this loops through each index of the answer array chosen (given by chosenIndex) that matches the questions array 
-        for (var i = 0; i < 4; i++) {
-            var answerText = answers[qaIndex][i];
-            answerRow.append($('<label><input class="radio-space" type="radio" name="optradio' + qaIndex + '"value=' + i + '>' + answerText + '</label>'));
-        };
-        // this removes the random (chosenIndex) from indexes array, so we don't get any repeats
-        indexes.splice(chosenIndex, 1);
-        // this writes the question/answer lines in the html class container
-        $(".qa-container").append(questionRow, answerRow);
-        // this pushes the randomly chosen index into a new array
-        qaCheck.push(qaIndex);
-    };
-
-    // this function gives me the index value of the answer array that the user checked
-    function getCheckValue() {
-        for (var i = 0; i < qaCheck.length; i++) {
-            var checkedAns = $('[name=optradio' + qaCheck[i] + ']:checked').val();
-            if (parseInt(checkedAns) === correctAnswers[qaCheck[i]]) {
-                winCount++;
-            } else if (checkedAns === undefined) {
-                noAnswer++;
-            }
-        };
-    };
-
-    function run() {
-        // this is set to run every second - does not run decrement here (no parenthases)
-        clearInterval(intervalId);
-        // this makes something happen every second
-        intervalId = setInterval(decrement, 1000);
-    };
-
-    function decrement() {
-        // this reduces the startTime by one, every second ^
-        startTime--;
-        // adds the current number to the DOM (visible)
-        $("#timer").html("<h4> Time Remaining: " + startTime + "</h4>");
-        if (startTime === 0) {
-            stop();
-            addToStatusCont();
-        };
-    };
-
-    // defining function called stop
-    function stop() {
-        clearInterval(intervalId);
-    }
-
-    function addToStatusCont() {
-        getCheckValue();
-        $('.qa-container').hide();
-        $('.status-container').append('<div>Correct Answers: ' + winCount + '</div>').show();
-        $('.status-container').append('<div>Incorrect Answers: ' + (8 - winCount - noAnswer) + '</div>');
-        $('.status-container').append('<div>Unanswered: ' + noAnswer + '</div><br>');
-        var resetButton = $('<button type="button" class="btn btn-info">I solemnly swear that I am up to no good.</button>');
-        $('.status-container').append(resetButton);
-
-        console.log(winCount);
-        console.log(noAnswer);
-
-        resetButton.on("click", function () {
-            resetGame();
-        });
-    };
-
-    // defining a function that resets the game when solemnly swear button is clicked
-    function resetGame() {
-        winCount = 0;
-        noAnswer = 0;
-        console.log("resetGame");
-
-        $('.status-container').hide();
-        $('.status-container').empty();
-        $('.qa-container').empty();
-        $('.qa-container').show();
-        qaCheck = [];
-
-
-        $('#timer').show();
-        startTime = 31;
-        run();
-        decrement();
-        indexes = [];
-        for (i = 0; i < questions.length; i++) {
-            indexes.push(i);
-        }
-        for (var i = 0; i < 8; i++) {
-            makeQuestionRow();
-        }
-
-        var doneEarly = $('<button type="button" class="btn btn-warning">Mischief Managed</button>');
-        //$(".qa-container").append(doneEarly);
-
-        $(".qa-container").append(doneEarly);
-        doneEarly.on("click", function () {
-            $('#timer').hide();
-            $('.qa-container').hide();
-            addToStatusCont();
-            console.log("string");
-            stop();
-        });
-
-        console.log(noAnswer);
-
-    }
 
     // hide timer before Begin button is clicked
     $('#timer').hide();
