@@ -1,4 +1,3 @@
-# TriviaGame
-Multiple-choice trivia game
+# Trivia Game
 
 https://wneek018.github.io/TriviaGame/
